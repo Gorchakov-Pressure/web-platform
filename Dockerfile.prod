@@ -1,11 +1,12 @@
 FROM node:22-alpine AS builder
+RUN apk add --no-cache git
 WORKDIR /app
 
 COPY package*.json ./
 RUN npm ci
 
 COPY . .
-RUN git init && git submodule update --init 2>/dev/null || true
+RUN git init && git submodule update --init
 
 ARG VITE_HOST_URL=""
 ARG VITE_DESCOPE_PROJECT_ID=""
@@ -14,6 +15,7 @@ ENV VITE_HOST_URL=$VITE_HOST_URL
 ENV VITE_DESCOPE_PROJECT_ID=$VITE_DESCOPE_PROJECT_ID
 ENV VITE_COOKIE_DOMAIN=$VITE_COOKIE_DOMAIN
 
+ENV NODE_OPTIONS="--max-old-space-size=4096"
 RUN npm run build
 
 FROM nginx:alpine
